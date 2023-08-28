@@ -70,10 +70,10 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
 
     int mid = std::max(a.size(), b.size()) / 2;
 
-    std::string aLow = a.substr(std::max((int)a.size() - mid, 0));
-    std::string aHigh = a.substr(0, std::max((int)a.size() - mid, 0));
-    std::string bLow = b.substr(std::max((int)b.size() - mid, 0));
-    std::string bHigh = b.substr(0, std::max((int)b.size() - mid, 0));
+    std::string aLow = a.size() > mid ? a.substr(a.size() - mid) : a;
+    std::string aHigh = a.size() > mid ? a.substr(0, a.size() - mid) : "0";
+    std::string bLow = b.size() > mid ? b.substr(b.size() - mid) : b;
+    std::string bHigh = b.size() > mid ? b.substr(0, b.size() - mid) : "0";
 
     // Debugging lines
     std::cout << "aLow: " << aLow << ", aHigh: " << aHigh << std::endl;
