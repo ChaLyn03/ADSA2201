@@ -59,17 +59,12 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
     // Base cases
     if (a.size() <= 1 && b.size() <= 1) {
     int result = (a[0] - '0') * (b[0] - '0');
-    if(result < B) {
+    if (B != 10) {
+        int carry = result / B;
+        result = result % B;
+        return std::to_string(carry) + std::to_string(result);
+    } else {
         return std::to_string(result);
-    }
-    else {
-        std::string resultStr;
-        while(result) {
-            resultStr += (result % B) + '0';
-            result /= B;
-        }
-        std::reverse(resultStr.begin(), resultStr.end());
-        return resultStr;
     }
     }
 
@@ -88,20 +83,18 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
     std::string z0Plusz2 = addInBase(z0, z2, B);
     std::string z1 = subtractInBase(z1Product, z0Plusz2, B);  // We need to create this subtractInBase function.
 
-
-    // return z2 * B^(2*mid) + z1 * B^mid + z0
-    return addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
-
+    // Debug lines
     std::cout << "z0: " << z0 << "\n";
     std::cout << "z1: " << z1 << "\n";
     std::cout << "z2: " << z2 << "\n";
 
     // return z2 * B^(2*mid) + z1 * B^mid + z0
     std::string result = addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
-    std::cout << "Product: " << result << "\n";
-    return result;
+    std::cout << "Product: " << result << "\n";  // Debug line
 
+    return result;
 }
+
 
 int main() {
     std::string I1, I2;
