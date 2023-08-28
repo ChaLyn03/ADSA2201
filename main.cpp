@@ -2,18 +2,17 @@
 #include <string>
 #include <algorithm>
 
-// Helper function to add two numbers in base B using school method
 std::string addInBase(const std::string &num1, const std::string &num2, int B) {
-    int carry = 0;
-    ssize_t i = num1.size() - 1, j = num2.size() - 1;
+    int carry = 0, i = num1.size() - 1, j = num2.size() - 1;
     std::string result = "";
 
     while (i >= 0 || j >= 0 || carry) {
-        int sum = carry + (i >= 0 ? num1[i--] - '0' : 0) + (j >= 0 ? num2[j--] - '0' : 0);
+        int sum = carry;
+        if (i >= 0) sum += num1[i--] - '0';
+        if (j >= 0) sum += num2[j--] - '0';
         
         carry = sum / B;
-        sum %= B;
-
+        sum = sum % B;
         result += (sum + '0');
     }
     
@@ -21,30 +20,50 @@ std::string addInBase(const std::string &num1, const std::string &num2, int B) {
     return result;
 }
 
-// Helper function to pad zeros to a number
-std::string zeroPad(const std::string &num, size_t zeros) {
+std::string zeroPad(const std::string &num, int zeros) {
     return num + std::string(zeros, '0');
 }
 
-// Implementing Karatsuba multiplication
-std::string karatsubaMultiply(const std::string &a, const std::string &b, int B) {
-    if (a.size() == 1) {
+std::string subtractInBase(const std::string &num1, const std::string &num2, int B) {
+    int carry = 0, i = num1.size() - 1, j = num2.size() - 1;
     std::string result = "";
-    int carry = 0;
-    for (int j = b.size() - 1; j >= 0; j--) {
-        int prod = (a[0] - '0') * (b[j] - '0') + carry;
-        result += std::to_string(prod % B);
-        carry = prod / B;
+
+    while (i >= 0 || j >= 0) {
+        int diff = (i >= 0 ? num1[i--] - '0' : 0) - (j >= 0 ? num2[j--] - '0' : 0) - carry;
+
+        if (diff < 0) {
+            diff += B;
+            carry = 1;
+        } else {
+            carry = 0;
+        }
+
+        result += (diff + '0');
     }
-    if (carry) result += std::to_string(carry);
+    
+    while (result.size() > 1 && result.back() == '0') {
+        result.pop_back(); 
+    }
+
     std::reverse(result.begin(), result.end());
     return result;
-    } else if (b.size() == 1) {
-        return karatsubaMultiply(b, a, B);  // Swap and use the other base case.
+}
+
+std::string removeLeadingZeros(const std::string &num) {
+    size_t start_idx = 0;
+    while (start_idx < num.size() && num[start_idx] == '0') {
+        ++start_idx;
+    }
+    return start_idx < num.size() ? num.substr(start_idx) : "0";
+}
+
+std::string karatsubaMultiply(const std::string &a, const std::string &b, int B) {
+    if (a.size() <= 1 && b.size() <= 1) {
+        int result = (a[0] - '0') * (b[0] - '0');
+        return std::to_string(result);
     }
 
-
-    size_t mid = (std::max(a.size(), b.size()) + 1) / 2;
+    int mid = (std::max(a.size(), b.size()) + 1) / 2;
 
     std::string aLow = a.size() >= mid ? a.substr(a.size() - mid) : a;
     std::string aHigh = a.size() > mid ? a.substr(0, a.size() - mid) : "0";
@@ -53,14 +72,13 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
 
     std::string z0 = karatsubaMultiply(aLow, bLow, B);
     std::string z2 = karatsubaMultiply(aHigh, bHigh, B);
-    std::string aPlusb = addInBase(aLow, aHigh, B);
-    std::string cPlusd = addInBase(bLow, bHigh, B);
+    std::string aPlusb = removeLeadingZeros(addInBase(aLow, aHigh, B));
+    std::string cPlusd = removeLeadingZeros(addInBase(bLow, bHigh, B));
     std::string z1Product = karatsubaMultiply(aPlusb, cPlusd, B);
-    std::string z0Plusz2 = addInBase(z0, z2, B);
-    
-    std::string z1 = addInBase(z1Product, "-" + z0Plusz2, B); // Using subtraction logic for signed integers
+    std::string z0Plusz2 = removeLeadingZeros(addInBase(z0, z2, B));
+    std::string z1 = removeLeadingZeros(subtractInBase(z1Product, z0Plusz2, B));
 
-    return addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
+    return removeLeadingZeros(addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B));
 }
 
 int main() {
@@ -70,8 +88,7 @@ int main() {
 
     std::string sum = addInBase(I1, I2, B);
     std::string product = karatsubaMultiply(I1, I2, B);
-
-    std::string quotient = "0";  // Hardcoded division for undergraduate students
+    std::string quotient = "0";
 
     std::cout << sum << " " << product << " " << quotient << std::endl;
     return 0;
