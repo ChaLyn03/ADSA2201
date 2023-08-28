@@ -29,8 +29,12 @@ std::string zeroPad(const std::string &num, size_t zeros) {
 // Implementing Karatsuba multiplication
 std::string karatsubaMultiply(const std::string &a, const std::string &b, int B) {
     if (a.size() == 1 || b.size() == 1) {
-        int result = (a[0] - '0') * (b[0] - '0');
+    int result = (a[0] - '0') * (b[0] - '0');
+    if (result < B) {
+        return std::to_string(result);
+    } else {
         return std::to_string(result / B) + std::to_string(result % B);
+    }
     }
 
     size_t mid = (std::max(a.size(), b.size()) + 1) / 2;
