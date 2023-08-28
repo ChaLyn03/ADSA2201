@@ -91,6 +91,16 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
 
     // return z2 * B^(2*mid) + z1 * B^mid + z0
     return addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
+
+    std::cout << "z0: " << z0 << "\n";
+    std::cout << "z1: " << z1 << "\n";
+    std::cout << "z2: " << z2 << "\n";
+
+    // return z2 * B^(2*mid) + z1 * B^mid + z0
+    std::string result = addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
+    std::cout << "Product: " << result << "\n";
+    return result;
+
 }
 
 int main() {
