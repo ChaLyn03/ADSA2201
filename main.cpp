@@ -28,12 +28,49 @@ std::string zeroPad(const std::string &num, int zeros) {
     return num + std::string(zeros, '0');
 }
 
+std::string subtractInBase(const std::string &num1, const std::string &num2, int B) {
+    int carry = 0, i = num1.size() - 1, j = num2.size() - 1;
+    std::string result = "";
+
+    while (i >= 0 || j >= 0) {
+        int diff = (i >= 0 ? num1[i--] - '0' : 0) - (j >= 0 ? num2[j--] - '0' : 0) - carry;
+
+        if (diff < 0) {
+            diff += B;
+            carry = 1;
+        } else {
+            carry = 0;
+        }
+
+        result += (diff + '0');
+    }
+    
+    // Remove any leading zeros after subtraction
+    while (result.size() > 1 && result.back() == '0') {
+        result.pop_back(); 
+    }
+
+    std::reverse(result.begin(), result.end());
+    return result;
+}
+
 // Implementing Karatsuba multiplication
 std::string karatsubaMultiply(const std::string &a, const std::string &b, int B) {
     // Base cases
     if (a.size() <= 1 && b.size() <= 1) {
-        int result = (a[0] - '0') * (b[0] - '0');
+    int result = (a[0] - '0') * (b[0] - '0');
+    if(result < B) {
         return std::to_string(result);
+    }
+    else {
+        std::string resultStr;
+        while(result) {
+            resultStr += (result % B) + '0';
+            result /= B;
+        }
+        std::reverse(resultStr.begin(), resultStr.end());
+        return resultStr;
+    }
     }
 
     int mid = std::max(a.size(), b.size()) / 2;
@@ -45,7 +82,12 @@ std::string karatsubaMultiply(const std::string &a, const std::string &b, int B)
 
     std::string z0 = karatsubaMultiply(aLow, bLow, B);
     std::string z2 = karatsubaMultiply(aHigh, bHigh, B);
-    std::string z1 = addInBase(karatsubaMultiply(addInBase(aLow, aHigh, B), addInBase(bLow, bHigh, B), B), addInBase(z0, z2, B), B);
+    std::string aPlusb = addInBase(aLow, aHigh, B);
+    std::string cPlusd = addInBase(bLow, bHigh, B);
+    std::string z1Product = karatsubaMultiply(aPlusb, cPlusd, B);
+    std::string z0Plusz2 = addInBase(z0, z2, B);
+    std::string z1 = subtractInBase(z1Product, z0Plusz2, B);  // We need to create this subtractInBase function.
+
 
     // return z2 * B^(2*mid) + z1 * B^mid + z0
     return addInBase(addInBase(zeroPad(z2, 2*mid), zeroPad(z1, mid), B), z0, B);
